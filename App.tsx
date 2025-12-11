@@ -3,7 +3,7 @@ import Header from './components/Header';
 import EpisodeCard from './components/EpisodeCard';
 import StockWidget from './components/StockWidget';
 import { MOCK_EPISODES, MOCK_STOCKS, TICKER_DATA } from './constants';
-import { Mic, Wifi, Star, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { Mic, Wifi, Star, ArrowUpRight, ArrowDownRight, Activity, TrendingUp, Zap, BarChart3, Filter } from 'lucide-react';
 
 type ViewType = 'home' | 'podcaster' | 'ticker';
 
@@ -69,34 +69,131 @@ const App: React.FC = () => {
             ? MOCK_EPISODES 
             : MOCK_EPISODES.filter(ep => ep.showName.includes(filter));
 
+        // Extract unique podcasters for filter pills
+        const uniquePodcasters = Array.from(new Set(MOCK_EPISODES.map(ep => ep.showName))).map(name => {
+            const ep = MOCK_EPISODES.find(e => e.showName === name);
+            return {
+                name: name,
+                avatar: ep?.showAvatar || name[0],
+                color: ep?.showColorClass || 'bg-slate-500'
+            };
+        });
+
         return (
-            <div className="space-y-6">
-                {/* Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    {['All', '股癌', '財報狗'].map(f => (
+            <div className="space-y-8">
+                {/* Hero Section: Market Pulse */}
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Card 1: Market Sentiment */}
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                            <BarChart3 size={64} className="text-amber-500" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-2">
+                            <Activity size={14} /> 市場情緒
+                        </h3>
+                        <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                            貪婪 <span className="text-green-500 text-lg ml-1">75</span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-2">AI 伺服器與散熱族群持續領漲，市場信心強勁。</p>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 mt-3 rounded-full overflow-hidden">
+                            <div className="bg-gradient-to-r from-green-400 to-green-600 h-full w-3/4"></div>
+                        </div>
+                    </div>
+
+                    {/* Card 2: Hot Topic */}
+                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-5 rounded-2xl shadow-md text-white relative overflow-hidden group hover:shadow-lg transition cursor-pointer" onClick={() => setFilter('All')}>
+                        <div className="absolute -bottom-4 -right-4 bg-white/10 w-24 h-24 rounded-full blur-xl group-hover:blur-2xl transition"></div>
+                        <h3 className="text-sm font-medium text-indigo-100 mb-1 flex items-center gap-2">
+                            <Zap size={14} className="text-amber-300" /> 本週熱議
+                        </h3>
+                        <div className="text-2xl font-bold mb-1">#AI供應鏈</div>
+                        <div className="flex gap-2 mt-3">
+                            <span className="text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">奇鋐</span>
+                            <span className="text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">廣達</span>
+                        </div>
+                    </div>
+
+                    {/* Card 3: Most Mentioned Stock */}
+                    <div 
+                        className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-md transition cursor-pointer hover:border-amber-200 dark:hover:border-amber-900"
+                        onClick={() => navigateToTicker('2330')}
+                    >
+                         <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-2">
+                            <TrendingUp size={14} className="text-red-500" /> 關注焦點
+                        </h3>
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">台積電</div>
+                                <div className="text-xs text-slate-400">2330.TW</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-red-500 font-mono font-bold">950.0</div>
+                                <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-1 rounded">▲ 2.5%</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Styled Filters */}
+                <div className="sticky top-16 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-4 px-4 border-b border-transparent dark:border-slate-800/50 transition-colors">
+                    <div className="flex gap-3 overflow-x-auto no-scrollbar items-center">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">
+                            <Filter size={12} /> 篩選
+                        </div>
+                        
                         <button 
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`px-4 py-1.5 text-sm rounded-full font-medium whitespace-nowrap transition
-                                      ${filter === f 
-                                        ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900' 
-                                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+                            onClick={() => setFilter('All')}
+                            className={`flex items-center gap-2 pl-1 pr-4 py-1 rounded-full text-sm font-medium transition shadow-sm border
+                                      ${filter === 'All' 
+                                        ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-500 dark:text-slate-900 dark:border-amber-500' 
+                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700'}`}
                         >
-                            {f === 'All' ? '全部' : f === '股癌' ? '股癌 Gooaye' : '財報狗'}
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] 
+                                ${filter === 'All' ? 'bg-slate-600 text-slate-200 dark:bg-amber-600/50 dark:text-amber-900' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'}`}>
+                                All
+                            </span>
+                            全部
                         </button>
-                    ))}
+
+                        {uniquePodcasters.map(p => (
+                            <button 
+                                key={p.name}
+                                onClick={() => setFilter(p.name)}
+                                className={`flex items-center gap-2 pl-1 pr-4 py-1 rounded-full text-sm font-medium transition shadow-sm border
+                                          ${filter === p.name 
+                                            ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-500 dark:text-slate-900 dark:border-amber-500' 
+                                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700'}`}
+                            >
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${p.color}`}>
+                                    {p.avatar}
+                                </span>
+                                {p.name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Feed */}
-                <div className="space-y-6">
-                    {homeEpisodes.map(episode => (
-                        <EpisodeCard 
-                            key={episode.id} 
-                            episode={episode} 
-                            onPodcasterClick={navigateToPodcaster}
-                            onTickerClick={navigateToTicker}
-                        />
-                    ))}
+                {/* Feed Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <Mic size={20} className="text-amber-500" /> 最新摘要
+                        </h2>
+                        <span className="text-xs text-slate-500">
+                             顯示 {homeEpisodes.length} 個結果
+                        </span>
+                    </div>
+
+                    <div className="space-y-5">
+                        {homeEpisodes.map(episode => (
+                            <EpisodeCard 
+                                key={episode.id} 
+                                episode={episode} 
+                                onPodcasterClick={navigateToPodcaster}
+                                onTickerClick={navigateToTicker}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         );
