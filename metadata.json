@@ -1,0 +1,5 @@
+{
+  "name": "TrendBrief",
+  "description": "A financial podcast summary dashboard featuring real-time stock quotes, episode feeds, and market tickers.",
+  "requestFramePermissions": []
+}
