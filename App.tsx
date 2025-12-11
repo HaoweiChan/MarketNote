@@ -3,9 +3,9 @@ import Header from './components/Header';
 import EpisodeCard from './components/EpisodeCard';
 import StockWidget from './components/StockWidget';
 import { MOCK_EPISODES, MOCK_STOCKS, TICKER_DATA } from './constants';
-import { Mic, Wifi, Star, ArrowUpRight, ArrowDownRight, Activity, TrendingUp, Zap, BarChart3, Filter } from 'lucide-react';
+import { Mic, Wifi, Star, ArrowUpRight, ArrowDownRight, Activity, TrendingUp, Zap, Filter, ChevronRight, Hash, Tag, User, Mail, Calendar, Shield, Bell, Smartphone, Save } from 'lucide-react';
 
-type ViewType = 'home' | 'podcaster' | 'ticker';
+type ViewType = 'home' | 'podcaster' | 'ticker' | 'tag' | 'profile' | 'settings';
 
 const App: React.FC = () => {
     // Theme state
@@ -13,7 +13,7 @@ const App: React.FC = () => {
 
     // Navigation state
     const [view, setView] = useState<ViewType>('home');
-    const [viewId, setViewId] = useState<string>(''); // Stores podcaster name or ticker symbol
+    const [viewId, setViewId] = useState<string>(''); // Stores podcaster name, ticker symbol, or tag name
 
     // Filter state (for Home view)
     const [filter, setFilter] = useState<string>('All');
@@ -63,6 +63,30 @@ const App: React.FC = () => {
         window.scrollTo(0, 0);
     };
 
+    const navigateToTag = (tag: string) => {
+        setView('tag');
+        setViewId(tag);
+        window.scrollTo(0, 0);
+    };
+
+    const navigateToProfile = () => {
+        setView('profile');
+        setViewId('');
+        window.scrollTo(0, 0);
+    }
+
+    const navigateToSettings = () => {
+        setView('settings');
+        setViewId('');
+        window.scrollTo(0, 0);
+    }
+
+    // Helper to determine layout constraints
+    const isHome = view === 'home';
+    const isSettings = view === 'settings';
+    const isProfile = view === 'profile';
+    const useFullWidth = isHome || isSettings || isProfile;
+
     // --- VIEW: HOME CONTENT ---
     const renderHome = () => {
         const homeEpisodes = filter === 'All' 
@@ -81,55 +105,78 @@ const App: React.FC = () => {
 
         return (
             <div className="space-y-8">
-                {/* Hero Section: Market Pulse */}
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Card 1: Market Sentiment */}
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                            <BarChart3 size={64} className="text-amber-500" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-2">
-                            <Activity size={14} /> 市場情緒
+                {/* Hero Section: Trending Lists */}
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Trending Tickers */}
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                            <TrendingUp size={16} className="text-red-500" /> 熱門標的提及
                         </h3>
-                        <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                            貪婪 <span className="text-green-500 text-lg ml-1">75</span>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-2">AI 伺服器與散熱族群持續領漲，市場信心強勁。</p>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 mt-3 rounded-full overflow-hidden">
-                            <div className="bg-gradient-to-r from-green-400 to-green-600 h-full w-3/4"></div>
+                        <div className="space-y-2">
+                            {MOCK_STOCKS.map((stock, idx) => (
+                                <div 
+                                    key={stock.symbol}
+                                    onClick={() => navigateToTicker(stock.symbol)}
+                                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer group border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-400 group-hover:bg-white dark:group-hover:bg-slate-700 shadow-sm transition-colors text-xs">
+                                            {stock.symbol.split('.')[0]}
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                                {stock.name}
+                                            </div>
+                                            <div className="text-xs text-slate-400 flex items-center gap-1">
+                                                <Zap size={10} className="fill-amber-400 text-amber-400" />
+                                                {idx === 0 ? '3' : '1'} 集提及
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className={`font-mono font-bold text-sm ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                            {stock.price}
+                                        </div>
+                                        <div className={`text-xs ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                            {stock.change > 0 ? '+' : ''}{stock.changePercent}%
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Card 2: Hot Topic */}
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-5 rounded-2xl shadow-md text-white relative overflow-hidden group hover:shadow-lg transition cursor-pointer" onClick={() => setFilter('All')}>
-                        <div className="absolute -bottom-4 -right-4 bg-white/10 w-24 h-24 rounded-full blur-xl group-hover:blur-2xl transition"></div>
-                        <h3 className="text-sm font-medium text-indigo-100 mb-1 flex items-center gap-2">
-                            <Zap size={14} className="text-amber-300" /> 本週熱議
+                    {/* Trending Podcasters */}
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                            <Mic size={16} className="text-amber-500" /> 活躍頻道
                         </h3>
-                        <div className="text-2xl font-bold mb-1">#AI供應鏈</div>
-                        <div className="flex gap-2 mt-3">
-                            <span className="text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">奇鋐</span>
-                            <span className="text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">廣達</span>
-                        </div>
-                    </div>
-
-                    {/* Card 3: Most Mentioned Stock */}
-                    <div 
-                        className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-md transition cursor-pointer hover:border-amber-200 dark:hover:border-amber-900"
-                        onClick={() => navigateToTicker('2330')}
-                    >
-                         <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-2">
-                            <TrendingUp size={14} className="text-red-500" /> 關注焦點
-                        </h3>
-                        <div className="flex justify-between items-end">
-                            <div>
-                                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">台積電</div>
-                                <div className="text-xs text-slate-400">2330.TW</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-red-500 font-mono font-bold">950.0</div>
-                                <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-1 rounded">▲ 2.5%</div>
-                            </div>
+                         <div className="space-y-2">
+                            {uniquePodcasters.map(podcaster => {
+                                const latestEp = MOCK_EPISODES.find(e => e.showName === podcaster.name);
+                                return (
+                                    <div 
+                                        key={podcaster.name}
+                                        onClick={() => navigateToPodcaster(podcaster.name)}
+                                        className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer group border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                                    >
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${podcaster.color}`}>
+                                                {podcaster.avatar}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{podcaster.name}</div>
+                                                <div className="text-xs text-slate-400 truncate pr-2">
+                                                    最新: {latestEp?.title}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors">
+                                            <ChevronRight size={16} />
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
@@ -173,7 +220,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Feed Section */}
+                {/* Feed Section - 2 Column Grid */}
                 <div>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -184,13 +231,14 @@ const App: React.FC = () => {
                         </span>
                     </div>
 
-                    <div className="space-y-5">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {homeEpisodes.map(episode => (
                             <EpisodeCard 
                                 key={episode.id} 
                                 episode={episode} 
                                 onPodcasterClick={navigateToPodcaster}
                                 onTickerClick={navigateToTicker}
+                                onTagClick={navigateToTag}
                             />
                         ))}
                     </div>
@@ -252,6 +300,7 @@ const App: React.FC = () => {
                             episode={episode} 
                             onPodcasterClick={navigateToPodcaster}
                             onTickerClick={navigateToTicker}
+                            onTagClick={navigateToTag}
                         />
                     ))}
                     {podcasterEpisodes.length === 0 && (
@@ -344,6 +393,7 @@ const App: React.FC = () => {
                                 episode={episode} 
                                 onPodcasterClick={navigateToPodcaster}
                                 onTickerClick={navigateToTicker}
+                                onTagClick={navigateToTag}
                             />
                         ))}
                         {relatedEpisodes.length === 0 && (
@@ -363,41 +413,280 @@ const App: React.FC = () => {
         );
     };
 
+    // --- VIEW: TAG PROFILE ---
+    const renderTagView = () => {
+        const tagEpisodes = MOCK_EPISODES.filter(ep => ep.tags.includes(viewId));
+
+        return (
+            <div className="space-y-8">
+                {/* Tag Header */}
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                        <Hash size={40} />
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+                             <div>
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{viewId}</h1>
+                                <p className="text-slate-500 dark:text-slate-400 mt-2 flex items-center justify-center md:justify-start gap-2">
+                                    <Tag size={16} /> 相關主題探索
+                                </p>
+                            </div>
+                            <button className="bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-900 px-6 py-2 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2">
+                                <Wifi size={18} /> 追蹤話題
+                            </button>
+                        </div>
+                        
+                        <p className="text-slate-600 dark:text-slate-300 mt-4 leading-relaxed max-w-2xl">
+                            瀏覽所有關於「{viewId}」的 Podcast 摘要與市場討論。
+                        </p>
+                    </div>
+                </div>
+
+                {/* Episodes List */}
+                <div>
+                     <div className="flex items-center gap-2 mb-4">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">相關集數</h2>
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                        <span className="text-sm text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">{tagEpisodes.length} 集</span>
+                    </div>
+
+                    <div className="space-y-6">
+                        {tagEpisodes.map(episode => (
+                            <EpisodeCard 
+                                key={episode.id} 
+                                episode={episode} 
+                                onPodcasterClick={navigateToPodcaster}
+                                onTickerClick={navigateToTicker}
+                                onTagClick={navigateToTag}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // --- VIEW: PERSONAL PROFILE ---
+    const renderProfileView = () => {
+        // Mock Saved Stocks for the profile view
+        const savedStocks = MOCK_STOCKS.slice(0, 2); 
+        const savedEpisodes = MOCK_EPISODES;
+
+        return (
+            <div className="space-y-8">
+                 {/* User Header */}
+                 <div className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    
+                    <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                        <div className="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl bg-gradient-to-tr from-amber-500 to-purple-600 flex items-center justify-center text-2xl font-bold">
+                            AC
+                        </div>
+                        <div className="flex-1 text-center md:text-left space-y-2">
+                            <h1 className="text-3xl font-bold">Alex Chen</h1>
+                            <div className="flex flex-col md:flex-row items-center gap-4 text-slate-300 text-sm">
+                                <span className="flex items-center gap-1"><Mail size={14}/> alex.chen@trendbrief.com</span>
+                                <span className="hidden md:inline">•</span>
+                                <span className="flex items-center gap-1"><Calendar size={14}/> 2023年 10月 加入</span>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+
+                 {/* Saved Stocks Grid */}
+                 <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                        <Star size={18} className="text-amber-500" /> 自選清單
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {savedStocks.map(stock => (
+                            <div 
+                                key={stock.symbol}
+                                onClick={() => navigateToTicker(stock.symbol)}
+                                className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition cursor-pointer"
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div className="font-bold text-slate-900 dark:text-slate-100">{stock.name}</div>
+                                        <div className="text-xs text-slate-400">{stock.symbol}</div>
+                                    </div>
+                                    <div className={`text-right ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                        <div className="font-bold font-mono">{stock.price}</div>
+                                        <div className="text-xs">{stock.change > 0 ? '▲' : '▼'} {stock.changePercent}%</div>
+                                    </div>
+                                </div>
+                                <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div className={`h-full ${stock.change > 0 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: '60%' }}></div>
+                                </div>
+                            </div>
+                        ))}
+                        <button 
+                            onClick={() => {}} 
+                            className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition group"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Star size={20} />
+                            </div>
+                            <span className="text-sm font-medium">新增自選</span>
+                        </button>
+                    </div>
+                 </div>
+
+                 {/* Saved Episodes */}
+                 <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                        <Save size={18} className="text-indigo-500" /> 收藏集數
+                    </h3>
+                    <div className="space-y-4">
+                        {savedEpisodes.map(episode => (
+                            <EpisodeCard 
+                                key={episode.id} 
+                                episode={episode} 
+                                onPodcasterClick={navigateToPodcaster}
+                                onTickerClick={navigateToTicker}
+                                onTagClick={navigateToTag}
+                            />
+                        ))}
+                    </div>
+                 </div>
+            </div>
+        );
+    }
+
+    // --- VIEW: SETTINGS ---
+    const renderSettingsView = () => {
+        return (
+            <div className="max-w-3xl mx-auto space-y-8 pb-12">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">帳號設定</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">管理您的個人資料、通知偏好與訂閱方案。</p>
+                </div>
+
+                {/* Profile Section */}
+                <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                        <User size={18} className="text-slate-500" />
+                        <h2 className="font-bold text-slate-800 dark:text-slate-200">基本資料</h2>
+                    </div>
+                    <div className="p-6 space-y-6">
+                        <div className="flex flex-col md:flex-row gap-6 items-start">
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-500">
+                                    AC
+                                </div>
+                                <button className="text-xs text-amber-600 dark:text-amber-500 font-bold hover:underline">變更頭像</button>
+                            </div>
+                            <div className="flex-1 space-y-4 w-full">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">顯示名稱</label>
+                                        <input type="text" defaultValue="Alex Chen" className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                                        <input type="email" defaultValue="alex.chen@trendbrief.com" className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-500 cursor-not-allowed" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Notifications */}
+                <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                        <Bell size={18} className="text-slate-500" />
+                        <h2 className="font-bold text-slate-800 dark:text-slate-200">通知設定</h2>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">每日市場摘要</h3>
+                                <p className="text-xs text-slate-500">每天早上 8:00 發送昨日市場重點整理。</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" defaultChecked />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
+                            </label>
+                        </div>
+                        <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">追蹤標的警示</h3>
+                                <p className="text-xs text-slate-500">當自選股被提及時發送通知。</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" defaultChecked />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Security */}
+                <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 flex items-center gap-2">
+                        <Shield size={18} className="text-slate-500" />
+                        <h2 className="font-bold text-slate-800 dark:text-slate-200">登入與安全</h2>
+                    </div>
+                    <div className="p-6">
+                         <button className="text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white flex items-center gap-2 transition">
+                            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                            變更密碼
+                        </button>
+                    </div>
+                </section>
+
+                <div className="flex justify-end gap-4">
+                    <button 
+                        onClick={navigateHome}
+                        className="px-6 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    >
+                        取消
+                    </button>
+                    <button className="px-6 py-2 rounded-lg bg-amber-500 text-slate-900 font-bold hover:bg-amber-400 transition shadow-lg shadow-amber-500/20">
+                        儲存變更
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen pb-12">
+        <div className="min-h-screen pb-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
             <Header 
                 isDark={isDark} 
                 toggleTheme={toggleTheme} 
                 onHomeClick={navigateHome}
                 onTickerClick={navigateToTicker}
+                onProfileClick={navigateToProfile}
+                onSettingsClick={navigateToSettings}
             />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
-                    {/* Main Content Area */}
-                    <main className="lg:col-span-8">
+                    {/* Main Content Area: Full width on Home/Settings/Profile, 8 cols otherwise */}
+                    <main className={useFullWidth ? 'lg:col-span-12' : 'lg:col-span-8'}>
                         {view === 'home' && renderHome()}
                         {view === 'podcaster' && renderPodcasterView()}
                         {view === 'ticker' && renderTickerView()}
+                        {view === 'tag' && renderTagView()}
+                        {view === 'profile' && renderProfileView()}
+                        {view === 'settings' && renderSettingsView()}
                     </main>
 
-                    {/* Sidebar - Always visible, but static data for now */}
-                    <aside className="hidden lg:block lg:col-span-4 space-y-6">
-                        <div className="sticky top-24 space-y-6">
-                            
-                            <StockWidget stocks={MOCK_STOCKS} onTickerClick={navigateToTicker} />
+                    {/* Sidebar: Only visible when NOT on Home or Settings or Profile */}
+                    {!useFullWidth && (
+                        <aside className="hidden lg:block lg:col-span-4 space-y-6">
+                            <div className="sticky top-24 space-y-6">
+                                
+                                <StockWidget stocks={MOCK_STOCKS} onTickerClick={navigateToTicker} />
 
-                            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white text-center shadow-lg dark:from-indigo-900 dark:to-purple-900">
-                                <p className="font-bold text-lg mb-2">TrendBrief Pro</p>
-                                <p className="text-indigo-100 text-sm mb-4">解鎖 AI 自動逐字稿與深度分析。</p>
-                                <button className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-50 transition transform hover:scale-105 active:scale-95">
-                                    立即升級
-                                </button>
                             </div>
-
-                        </div>
-                    </aside>
+                        </aside>
+                    )}
                 </div>
             </div>
         </div>
