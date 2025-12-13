@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import EpisodeCard from './components/EpisodeCard';
 import StockWidget from './components/StockWidget';
 import { MOCK_EPISODES, MOCK_STOCKS, TICKER_DATA } from './constants';
@@ -104,126 +105,114 @@ const App: React.FC = () => {
         });
 
         return (
-            <div className="space-y-8">
-                {/* Hero Section: Trending Lists */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Trending Tickers */}
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
-                            <TrendingUp size={16} className="text-red-500" /> 熱門標的提及
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* LEFT CONTENT - FEED */}
+                <div className="lg:col-span-8 xl:col-span-9 space-y-6 order-2 lg:order-1">
+                    
+                    {/* Mobile Only: Trending Tickers (Horizontal Scroll) */}
+                    <div className="lg:hidden">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+                            <TrendingUp size={16} className="text-red-500 dark:text-red-400" /> 熱門標的提及
                         </h3>
-                        <div className="space-y-2">
-                            {MOCK_STOCKS.map((stock, idx) => (
-                                <div 
-                                    key={stock.symbol}
-                                    onClick={() => navigateToTicker(stock.symbol)}
-                                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer group border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-400 group-hover:bg-white dark:group-hover:bg-slate-700 shadow-sm transition-colors text-xs">
-                                            {stock.symbol.split('.')[0]}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                                                {stock.name}
-                                            </div>
-                                            <div className="text-xs text-slate-400 flex items-center gap-1">
-                                                <Zap size={10} className="fill-amber-400 text-amber-400" />
-                                                {idx === 0 ? '3' : '1'} 集提及
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className={`font-mono font-bold text-sm ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                            {stock.price}
-                                        </div>
-                                        <div className={`text-xs ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                            {stock.change > 0 ? '+' : ''}{stock.changePercent}%
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                            {MOCK_STOCKS.map((stock, idx) => {
+                                const isUp = stock.change > 0;
+                                const strokeClass = isUp ? 'stroke-red-500 dark:stroke-red-400' : 'stroke-green-500 dark:stroke-green-400';
+                                const pathD = isUp 
+                                    ? "M0 15 L10 12 L20 16 L30 8 L40 10 L50 4 L60 2" 
+                                    : "M0 5 L10 8 L20 4 L30 12 L40 10 L50 16 L60 18";
+                                const mentions = idx === 0 ? 3 : 1;
 
-                    {/* Trending Podcasters */}
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
-                            <Mic size={16} className="text-amber-500" /> 活躍頻道
-                        </h3>
-                         <div className="space-y-2">
-                            {uniquePodcasters.map(podcaster => {
-                                const latestEp = MOCK_EPISODES.find(e => e.showName === podcaster.name);
                                 return (
                                     <div 
-                                        key={podcaster.name}
-                                        onClick={() => navigateToPodcaster(podcaster.name)}
-                                        className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer group border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                                        key={stock.symbol}
+                                        onClick={() => navigateToTicker(stock.symbol)}
+                                        className="min-w-[280px] bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm active:scale-95 transition-transform cursor-pointer"
                                     >
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${podcaster.color}`}>
-                                                {podcaster.avatar}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{podcaster.name}</div>
-                                                <div className="text-xs text-slate-400 truncate pr-2">
-                                                    最新: {latestEp?.title}
+                                        <div className="flex items-center justify-between gap-3">
+                                            {/* Left: Badge & Info */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-10 rounded bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center flex-shrink-0">
+                                                    <span className="font-bold text-slate-500 dark:text-slate-400 text-xs font-mono">
+                                                        {stock.symbol.split('.')[0]}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                                                        {stock.name}
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                                                        <Zap size={10} className="fill-amber-500 text-amber-500 dark:text-amber-400" />
+                                                        {mentions} 集提及
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors">
-                                            <ChevronRight size={16} />
+                                            
+                                            {/* Middle: Sparkline */}
+                                            <div className="h-8 flex-1 flex items-center opacity-80">
+                                                <svg viewBox="0 0 60 20" className={`fill-none stroke-2 ${strokeClass}`} width="100%" height="100%">
+                                                    <path d={pathD} strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            </div>
+                                            
+                                            {/* Right: Price */}
+                                            <div className="text-right">
+                                                <div className="font-bold font-mono text-sm text-slate-900 dark:text-white leading-tight">
+                                                    {stock.price}
+                                                </div>
+                                                <div className={`text-[10px] font-bold mt-0.5 ${isUp ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                                    {isUp ? '+' : ''}{stock.changePercent}%
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
-                </section>
 
-                {/* Styled Filters */}
-                <div className="sticky top-16 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-sm py-2 -mx-4 px-4 border-b border-transparent dark:border-slate-800/50 transition-colors">
-                    <div className="flex gap-3 overflow-x-auto no-scrollbar items-center">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">
-                            <Filter size={12} /> 篩選
+                    {/* Filters */}
+                    <div className="flex items-center gap-4 mb-4 overflow-x-auto no-scrollbar pb-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                            <Filter size={14} /> 篩選
                         </div>
                         
-                        <button 
-                            onClick={() => setFilter('All')}
-                            className={`flex items-center gap-2 pl-1 pr-4 py-1 rounded-full text-sm font-medium transition shadow-sm border
-                                      ${filter === 'All' 
-                                        ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-500 dark:text-slate-900 dark:border-amber-500' 
-                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700'}`}
-                        >
-                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] 
-                                ${filter === 'All' ? 'bg-slate-600 text-slate-200 dark:bg-amber-600/50 dark:text-amber-900' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'}`}>
-                                All
-                            </span>
-                            全部
-                        </button>
-
-                        {uniquePodcasters.map(p => (
+                        <div className="flex gap-3 items-center">
                             <button 
-                                key={p.name}
-                                onClick={() => setFilter(p.name)}
-                                className={`flex items-center gap-2 pl-1 pr-4 py-1 rounded-full text-sm font-medium transition shadow-sm border
-                                          ${filter === p.name 
-                                            ? 'bg-slate-800 text-white border-slate-800 dark:bg-amber-500 dark:text-slate-900 dark:border-amber-500' 
-                                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700'}`}
+                                onClick={() => setFilter('All')}
+                                className={`flex items-center gap-2 pl-1 pr-4 py-1.5 rounded-full text-sm font-medium transition shadow-sm border whitespace-nowrap
+                                          ${filter === 'All' 
+                                            ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-md' 
+                                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                             >
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${p.color}`}>
-                                    {p.avatar}
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold
+                                    ${filter === 'All' ? 'bg-amber-600/50 text-amber-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                                    All
                                 </span>
-                                {p.name}
+                                全部
                             </button>
-                        ))}
-                    </div>
-                </div>
 
-                {/* Feed Section - 2 Column Grid */}
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            {uniquePodcasters.map(p => (
+                                <button 
+                                    key={p.name}
+                                    onClick={() => setFilter(p.name)}
+                                    className={`flex items-center gap-2 pl-1 pr-4 py-1.5 rounded-full text-sm font-medium transition shadow-sm border whitespace-nowrap
+                                              ${filter === p.name 
+                                                ? 'bg-amber-500 text-slate-900 border-amber-500 shadow-md' 
+                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                >
+                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${p.color}`}>
+                                        {p.avatar}
+                                    </span>
+                                    {p.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Feed Header */}
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                             <Mic size={20} className="text-amber-500" /> 最新摘要
                         </h2>
                         <span className="text-xs text-slate-500">
@@ -231,7 +220,8 @@ const App: React.FC = () => {
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Feed List */}
+                    <div className="flex flex-col gap-4">
                         {homeEpisodes.map(episode => (
                             <EpisodeCard 
                                 key={episode.id} 
@@ -241,6 +231,100 @@ const App: React.FC = () => {
                                 onTagClick={navigateToTag}
                             />
                         ))}
+                    </div>
+                </div>
+
+                {/* RIGHT SIDEBAR - WIDGETS */}
+                <div className="lg:col-span-4 xl:col-span-3 space-y-6 order-1 lg:order-2">
+                    {/* Trending Tickers Widget - Desktop Only */}
+                    <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-lg">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <TrendingUp size={16} className="text-red-500 dark:text-red-400" /> 熱門標的提及
+                        </h3>
+                        <div className="space-y-3">
+                            {MOCK_STOCKS.map((stock, idx) => {
+                                const isUp = stock.change > 0;
+                                const strokeClass = isUp ? 'stroke-red-500 dark:stroke-red-400' : 'stroke-green-500 dark:stroke-green-400';
+                                const pathD = isUp 
+                                    ? "M0 15 L10 12 L20 16 L30 8 L40 10 L50 4 L60 2" 
+                                    : "M0 5 L10 8 L20 4 L30 12 L40 10 L50 16 L60 18";
+                                const mentions = idx === 0 ? 3 : 1;
+
+                                return (
+                                    <div 
+                                        key={stock.symbol}
+                                        onClick={() => navigateToTicker(stock.symbol)}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer group border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-10 rounded bg-slate-200 dark:bg-slate-700 flex flex-col items-center justify-center flex-shrink-0">
+                                                <span className="font-bold text-slate-600 dark:text-slate-300 text-xs font-mono">
+                                                    {stock.symbol.split('.')[0]}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-slate-900 dark:text-slate-200 text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                                    {stock.name}
+                                                </div>
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                                                    <Zap size={10} className="fill-amber-500 text-amber-500 dark:text-amber-400" />
+                                                    {mentions} 集提及
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="h-8 flex-1 max-w-[60px] flex items-center opacity-80 mx-2">
+                                            <svg viewBox="0 0 60 20" className={`fill-none stroke-2 ${strokeClass}`} width="100%" height="100%">
+                                                <path d={pathD} strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                                                {stock.price}
+                                            </div>
+                                            <div className={`text-[10px] font-bold ${isUp ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                                {isUp ? '+' : ''}{stock.changePercent}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Active Podcasters Widget */}
+                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-lg">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                            <Mic size={16} className="text-amber-500" /> 活躍頻道
+                        </h3>
+                         <div className="space-y-3">
+                            {uniquePodcasters.map(podcaster => {
+                                const latestEp = MOCK_EPISODES.find(e => e.showName === podcaster.name);
+                                return (
+                                    <div 
+                                        key={podcaster.name}
+                                        onClick={() => navigateToPodcaster(podcaster.name)}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer group border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                                    >
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold ${podcaster.color}`}>
+                                                {podcaster.avatar}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-slate-900 dark:text-slate-200 text-sm">{podcaster.name}</div>
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate pr-2 opacity-70">
+                                                    最新: {latestEp?.title}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-slate-400 dark:text-slate-600 group-hover:text-amber-500 transition-colors">
+                                            <ChevronRight size={14} />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -500,30 +584,63 @@ const App: React.FC = () => {
                         <Star size={18} className="text-amber-500" /> 自選清單
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {savedStocks.map(stock => (
-                            <div 
-                                key={stock.symbol}
-                                onClick={() => navigateToTicker(stock.symbol)}
-                                className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition cursor-pointer"
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <div className="font-bold text-slate-900 dark:text-slate-100">{stock.name}</div>
-                                        <div className="text-xs text-slate-400">{stock.symbol}</div>
-                                    </div>
-                                    <div className={`text-right ${stock.change > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                        <div className="font-bold font-mono">{stock.price}</div>
-                                        <div className="text-xs">{stock.change > 0 ? '▲' : '▼'} {stock.changePercent}%</div>
+                        {savedStocks.map((stock, idx) => {
+                            const isUp = stock.change > 0;
+                            const strokeClass = isUp ? 'stroke-red-500 dark:stroke-red-400' : 'stroke-green-500 dark:stroke-green-400';
+                            const pathD = isUp 
+                                ? "M0 15 L10 12 L20 16 L30 8 L40 10 L50 4 L60 2" 
+                                : "M0 5 L10 8 L20 4 L30 12 L40 10 L50 16 L60 18";
+                            // For demo purposes in saved list, just mock 0 or a number
+                            const mentions = idx === 0 ? 3 : 1; 
+
+                            return (
+                                <div 
+                                    key={stock.symbol}
+                                    onClick={() => navigateToTicker(stock.symbol)}
+                                    className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition cursor-pointer group"
+                                >
+                                    <div className="flex items-center justify-between gap-3">
+                                        {/* Left: Badge & Info */}
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-12 h-10 rounded bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center flex-shrink-0">
+                                                <span className="font-bold text-slate-500 dark:text-slate-400 text-xs font-mono">
+                                                    {stock.symbol.split('.')[0]}
+                                                </span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                                                    {stock.name}
+                                                </div>
+                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                                                    <Zap size={10} className="fill-amber-500 text-amber-500 dark:text-amber-400" />
+                                                    {mentions} 集提及
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Middle: Sparkline */}
+                                        <div className="h-8 flex-1 max-w-[60px] flex items-center opacity-80">
+                                            <svg viewBox="0 0 60 20" className={`fill-none stroke-2 ${strokeClass}`} width="100%" height="100%">
+                                                <path d={pathD} strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                        </div>
+                                        
+                                        {/* Right: Price */}
+                                        <div className="text-right flex-shrink-0">
+                                            <div className="font-bold font-mono text-sm text-slate-900 dark:text-white leading-tight">
+                                                {stock.price}
+                                            </div>
+                                            <div className={`text-[10px] font-bold mt-0.5 ${isUp ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                                {isUp ? '+' : ''}{stock.changePercent}%
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                    <div className={`h-full ${stock.change > 0 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: '60%' }}></div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         <button 
                             onClick={() => {}} 
-                            className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition group"
+                            className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition group h-full min-h-[80px]"
                         >
                             <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <Star size={20} />
@@ -654,7 +771,7 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen pb-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+        <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
             <Header 
                 isDark={isDark} 
                 toggleTheme={toggleTheme} 
@@ -664,7 +781,7 @@ const App: React.FC = () => {
                 onSettingsClick={navigateToSettings}
             />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
                     {/* Main Content Area: Full width on Home/Settings/Profile, 8 cols otherwise */}
@@ -689,6 +806,8 @@ const App: React.FC = () => {
                     )}
                 </div>
             </div>
+            
+            <Footer />
         </div>
     );
 };

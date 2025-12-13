@@ -22,11 +22,18 @@ const StockWidget: React.FC<StockWidgetProps> = ({ stocks, onTickerClick }) => {
             </div>
             
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {stocks.map((stock) => {
+                {stocks.map((stock, idx) => {
                     const isUp = stock.change > 0;
                     const colorClass = isUp ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
-                    const bgClass = isUp ? 'bg-red-50 dark:bg-transparent' : 'bg-green-50 dark:bg-transparent';
-                    const barColorClass = isUp ? 'bg-red-500' : 'bg-green-500';
+                    
+                    // Sparkline styling
+                    const strokeClass = isUp ? 'stroke-red-500 dark:stroke-red-400' : 'stroke-green-500 dark:stroke-green-400';
+                    const pathD = isUp 
+                        ? "M0 15 L10 12 L20 16 L30 8 L40 10 L50 4 L60 2" 
+                        : "M0 5 L10 8 L20 4 L30 12 L40 10 L50 16 L60 18";
+
+                    // Mock mentions count
+                    const mentions = idx === 0 ? 3 : 1;
 
                     return (
                         <div 
@@ -34,27 +41,41 @@ const StockWidget: React.FC<StockWidgetProps> = ({ stocks, onTickerClick }) => {
                             onClick={() => onTickerClick(stock.symbol)}
                             className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group"
                         >
-                            <div className="flex justify-between items-center mb-1">
-                                <div>
-                                    <div className="text-slate-900 dark:text-slate-100 font-bold text-lg group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                                        {stock.name}
+                            <div className="flex items-center justify-between gap-4">
+                                {/* Left: Badge & Info */}
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-12 h-10 rounded bg-slate-200 dark:bg-slate-700 flex flex-col items-center justify-center flex-shrink-0">
+                                        <span className="font-bold text-slate-600 dark:text-slate-300 text-xs font-mono">
+                                            {stock.symbol.split('.')[0]}
+                                        </span>
                                     </div>
-                                    <div className="text-xs text-slate-400">{stock.symbol}</div>
+                                    <div className="min-w-0">
+                                        <div className="text-slate-900 dark:text-slate-100 font-bold text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                                            {stock.name}
+                                        </div>
+                                        <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                                            <Zap size={10} className="fill-amber-500 text-amber-500 dark:text-amber-400" />
+                                            {mentions} 集提及
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className={`${colorClass} font-bold font-mono text-lg`}>
+                                
+                                {/* Middle: Sparkline */}
+                                <div className="h-8 flex-1 max-w-[80px] flex items-center opacity-80">
+                                    <svg viewBox="0 0 60 20" className={`fill-none stroke-2 ${strokeClass}`} width="100%" height="100%">
+                                        <path d={pathD} strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                                
+                                {/* Right: Price */}
+                                <div className="text-right flex-shrink-0">
+                                    <div className="font-bold font-mono text-sm text-slate-900 dark:text-white leading-tight">
                                         {stock.price.toLocaleString(undefined, { minimumFractionDigits: 1 })}
                                     </div>
-                                    <div className={`${colorClass} text-xs font-mono ${bgClass} px-1 rounded inline-block`}>
-                                        {isUp ? '▲' : '▼'} {Math.abs(stock.changePercent).toFixed(2)}%
+                                    <div className={`${colorClass} text-xs font-mono font-bold mt-0.5`}>
+                                        {isUp ? '+' : ''}{Math.abs(stock.changePercent).toFixed(2)}%
                                     </div>
                                 </div>
-                            </div>
-                            <div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
-                                <div 
-                                    className={`h-full ${barColorClass}`} 
-                                    style={{ width: `${stock.strength}%` }}
-                                ></div>
                             </div>
                         </div>
                     );

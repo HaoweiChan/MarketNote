@@ -55,31 +55,31 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, onPodcasterClick, on
                           dark:bg-slate-900 dark:border-slate-800 dark:shadow-none">
             <div className="p-6 flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                         <button 
                             onClick={() => onPodcasterClick(episode.showName)}
-                            className={`w-12 h-12 rounded flex items-center justify-center text-xs font-bold ${episode.showColorClass} hover:opacity-80 transition flex-shrink-0`}
+                            className={`w-12 h-12 rounded flex items-center justify-center text-xs font-bold ${episode.showColorClass} hover:opacity-80 transition flex-shrink-0 mt-0.5`}
                         >
                             {episode.showAvatar}
                         </button>
                         <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
                                 {episode.title}
                             </h2>
-                            <div className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            <div className="flex items-center gap-1.5 text-sm text-slate-400 dark:text-slate-500 mt-1.5">
                                 <button 
                                     onClick={() => onPodcasterClick(episode.showName)}
-                                    className="hover:text-amber-600 dark:hover:text-amber-400 transition"
+                                    className="hover:text-amber-600 dark:hover:text-amber-400 transition font-medium"
                                 >
                                     {episode.showName}
                                 </button>
-                                <span>•</span>
+                                <span className="text-slate-300 dark:text-slate-600">•</span>
                                 <span>{episode.timeAgo}</span>
                             </div>
                         </div>
                     </div>
                     {episode.isHot && (
-                        <span className="bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-100 dark:border-amber-900 whitespace-nowrap">
+                        <span className="bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold px-2.5 py-0.5 rounded border border-amber-100 dark:border-amber-900 whitespace-nowrap ml-2">
                             熱門
                         </span>
                     )}
@@ -125,8 +125,8 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, onPodcasterClick, on
                             </button>
                         ))}
                     </div>
-                    <button className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium hover:text-amber-700 dark:hover:text-amber-300 transition group-hover:translate-x-1 duration-200">
-                        <PlayCircle size={20} /> 收聽
+                    <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 px-4 py-1.5 rounded-full text-sm font-bold transition shadow-md shadow-amber-500/20 active:scale-95 whitespace-nowrap">
+                        <PlayCircle size={16} className="fill-slate-900/10" /> 收聽
                     </button>
                 </div>
             </div>
